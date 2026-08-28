@@ -1,0 +1,2555 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Database Alumni</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+
+tailwind.config = {
+
+  theme: {
+
+    extend: {
+
+      colors: {
+
+        navy: '#0A192F',
+
+        maritime: '#102A43',
+
+        gold: '#F5C542',
+
+        sea: '#486581'
+
+      }
+
+    }
+
+  }
+
+};
+
+</script>
+
+
+<link rel="stylesheet" href="css/style.css">
+
+
+</head>
+
+
+<body class="bg-slate-100 text-slate-800">
+
+
+<!-- =====================================================
+     AUTH SCREEN
+===================================================== -->
+
+<div id="authScreen"
+     class="min-h-screen
+            flex
+            items-center
+            justify-center
+            px-4
+            bg-gradient-to-br
+            from-navy
+            via-slate-900
+            to-slate-800">
+
+
+  <div class="w-full max-w-md">
+
+
+    <div class="text-center
+                text-white
+                mb-8">
+
+      <div class="mx-auto
+                  w-16 h-16
+                  rounded-2xl
+                  bg-gold
+                  text-navy
+                  flex
+                  items-center
+                  justify-center
+                  text-3xl
+                  shadow-xl">
+
+        ⚓
+
+      </div>
+
+
+      <h1 class="text-2xl
+                 font-black
+                 mt-4">
+
+        Database Alumni
+
+      </h1>
+
+
+      <p class="text-slate-300
+                text-sm
+                mt-1">
+
+        SMK Pelayaran Samudera Cilacap
+
+      </p>
+
+    </div>
+
+
+    <div class="bg-white
+                rounded-3xl
+                shadow-2xl
+                p-6 md:p-8">
+
+
+      <!-- LOGIN -->
+
+      <div id="loginBox">
+
+        <h2 class="text-xl
+                   font-bold
+                   text-navy">
+
+          Selamat Datang
+
+        </h2>
+
+
+        <p class="text-sm
+                  text-slate-500
+                  mt-1
+                  mb-6">
+
+          Login untuk mengakses database alumni.
+
+        </p>
+
+
+        <form id="loginForm"
+              class="space-y-4">
+
+
+          <div>
+
+            <label class="label">
+
+              Email
+
+            </label>
+
+
+            <input
+              id="loginEmail"
+              type="email"
+              autocomplete="email"
+              required
+              class="input"
+              placeholder="nama@email.com">
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+
+              Password
+
+            </label>
+
+
+            <input
+              id="loginPassword"
+              type="password"
+              autocomplete="current-password"
+              required
+              class="input"
+              placeholder="Password">
+
+          </div>
+
+
+          <button
+            id="loginButton"
+            type="submit"
+            class="w-full
+                   bg-navy
+                   hover:bg-slate-800
+                   text-white
+                   py-3
+                   rounded-xl
+                   font-bold
+                   transition">
+
+            Login
+
+          </button>
+
+          <div class="text-right mt-3">
+
+          <button
+          type="button"
+          onclick="showForgotPassword()"
+          class="text-sm
+           font-semibold
+           text-sea
+           hover:text-navy">
+
+           Lupa password?
+
+           </button>
+
+</div>
+
+        </form>
+
+    
+
+        <div class="text-center
+                    mt-5">
+
+          <button
+            onclick="showRegister()"
+            class="text-sm
+                   font-semibold
+                   text-sea">
+
+            Belum punya akun?
+            <span class="text-navy">
+              Daftar
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- REGISTER -->
+
+      <div id="registerBox"
+           class="hidden">
+
+
+        <h2 class="text-xl
+                   font-bold
+                   text-navy">
+
+          Registrasi Alumni
+
+        </h2>
+
+
+        <p class="text-sm
+                  text-slate-500
+                  mt-1
+                  mb-6">
+
+          Buat akun alumni baru.
+
+        </p>
+
+
+        <form id="registerForm"
+              class="space-y-4">
+
+
+          <div>
+
+            <label class="label">
+              Nama Lengkap
+            </label>
+
+            <input
+              id="regNama"
+              required
+              class="input"
+              placeholder="Nama lengkap">
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+              Email
+            </label>
+
+            <input
+              id="regEmail"
+              type="email"
+              required
+              class="input"
+              placeholder="nama@email.com">
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+              WhatsApp
+            </label>
+
+            <input
+              id="regWA"
+              required
+              class="input"
+              placeholder="08xxxxxxxxxx">
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+              Jurusan
+            </label>
+
+            <select
+              id="regJurusan"
+              required
+              class="input">
+
+              <option value="">
+                Pilih Jurusan
+              </option>
+
+              <option value="Nautika">
+                Nautika
+              </option>
+
+              <option value="Teknika">
+                Teknika
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+              Password
+            </label>
+
+            <input
+              id="regPassword"
+              type="password"
+              minlength="8"
+              required
+              class="input"
+              placeholder="Minimal 8 karakter">
+
+          </div>
+
+
+          <button
+            id="registerButton"
+            type="submit"
+            class="w-full
+                   bg-gold
+                   text-navy
+                   py-3
+                   rounded-xl
+                   font-black">
+
+            Daftar Alumni
+
+          </button>
+
+
+        </form>
+
+
+        <div class="text-center
+                    mt-5">
+
+          <button
+            onclick="showLogin()"
+            class="text-sm
+                   font-semibold
+                   text-sea">
+
+            Sudah punya akun?
+            <span class="text-navy">
+              Login
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+      <!-- FORGOT PASSWORD -->
+
+<div id="forgotPasswordBox"
+     class="hidden">
+
+  <h2 class="text-xl
+             font-bold
+             text-navy">
+
+    Reset Password
+
+  </h2>
+
+
+  <p class="text-sm
+            text-slate-500
+            mt-1
+            mb-6">
+
+    Masukkan email akun Anda untuk mendapatkan
+    kode OTP.
+
+  </p>
+
+
+  <!-- STEP 1 -->
+
+  <div id="resetRequestStep">
+
+
+    <form
+      id="forgotPasswordForm"
+      class="space-y-4">
+
+
+      <div>
+
+        <label class="label">
+
+          Email
+
+        </label>
+
+
+        <input
+          id="forgotEmail"
+          type="email"
+          class="input"
+          placeholder="nama@email.com"
+          required>
+
+      </div>
+
+
+      <button
+        type="submit"
+        id="sendOtpButton"
+        class="w-full
+               bg-navy
+               text-white
+               py-3
+               rounded-xl
+               font-bold">
+
+        Kirim Kode OTP
+
+      </button>
+
+
+    </form>
+
+
+  </div>
+
+
+
+  <!-- STEP 2 -->
+
+  <div id="resetPasswordStep"
+       class="hidden">
+
+
+    <div class="
+      rounded-xl
+      bg-blue-50
+      text-blue-700
+      text-sm
+      p-4
+      mb-5">
+
+      Kode OTP telah dikirim ke email Anda.
+      Kode berlaku selama 10 menit.
+
+    </div>
+
+
+    <form
+      id="resetPasswordForm"
+      class="space-y-4">
+
+
+      <div>
+
+        <label class="label">
+
+          Kode OTP
+
+        </label>
+
+
+        <input
+          id="resetOtp"
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          pattern="[0-9]{6}"
+          class="input text-center
+                 tracking-[.4em]
+                 font-black"
+          placeholder="000000"
+          required>
+
+      </div>
+
+
+      <div>
+
+        <label class="label">
+
+          Password Baru
+
+        </label>
+
+
+        <input
+          id="resetNewPassword"
+          type="password"
+          minlength="8"
+          class="input"
+          placeholder="Minimal 8 karakter"
+          required>
+
+      </div>
+
+
+      <div>
+
+        <label class="label">
+
+          Konfirmasi Password
+
+        </label>
+
+
+        <input
+          id="resetConfirmPassword"
+          type="password"
+          minlength="8"
+          class="input"
+          placeholder="Ulangi password baru"
+          required>
+
+      </div>
+
+
+      <button
+        type="submit"
+        id="resetPasswordButton"
+        class="w-full
+               bg-gold
+               text-navy
+               py-3
+               rounded-xl
+               font-black">
+
+        Reset Password
+
+      </button>
+
+
+    </form>
+
+
+    <button
+      onclick="backToResetEmail()"
+      class="w-full
+             mt-3
+             text-sm
+             text-slate-500">
+
+      ← Kirim ulang / gunakan email lain
+
+    </button>
+
+
+  </div>
+
+
+  <div class="text-center mt-5">
+
+    <button
+      onclick="showLogin()"
+      class="text-sm
+             font-semibold
+             text-sea">
+
+      ← Kembali ke Login
+
+    </button>
+
+  </div>
+
+
+</div>
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     APP
+===================================================== -->
+
+<div id="app"
+     class="hidden
+            min-h-screen">
+
+
+  <!-- MOBILE HEADER -->
+
+  <header
+    class="lg:hidden
+           sticky top-0
+           z-40
+           bg-navy
+           text-white
+           px-4 py-3
+           flex
+           items-center
+           justify-between">
+
+    <button
+      onclick="toggleSidebar()"
+      class="text-2xl">
+
+      ☰
+
+    </button>
+
+
+    <div class="font-bold">
+
+      ⚓ Alumni Portal
+
+    </div>
+
+
+    <div class="w-7"></div>
+
+  </header>
+
+
+
+  <!-- SIDEBAR -->
+
+  <aside id="sidebar"
+         class="sidebar
+                fixed
+                z-50
+                top-0
+                left-0
+                h-screen
+                w-72
+                text-white
+                transform
+                -translate-x-full
+                lg:translate-x-0
+                transition-transform
+                duration-300">
+
+
+    <div class="p-6">
+
+
+      <div class="flex
+                  items-center
+                  gap-3">
+
+
+        <div class="w-11 h-11
+                    rounded-xl
+                    bg-gold
+                    text-navy
+                    flex
+                    items-center
+                    justify-center
+                    text-xl">
+
+          ⚓
+
+        </div>
+
+
+        <div>
+
+          <div class="font-black">
+
+            Alumni Portal
+
+          </div>
+
+
+          <div class="text-xs
+                      text-slate-300">
+
+            SMK Pelayaran Samudera
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- USER -->
+
+      <div id="userMini"
+           class="mt-8
+                  rounded-2xl
+                  bg-white/10
+                  p-4">
+
+      </div>
+
+
+
+      <!-- NAVIGATION -->
+
+      <nav class="mt-7
+                  space-y-1">
+
+
+        <button
+          onclick="navigate('dashboard')"
+          class="nav-item">
+
+          <span>🏠</span>
+
+          <span>
+            Dashboard
+          </span>
+
+        </button>
+
+
+        <button
+          onclick="navigate('profile')"
+          class="nav-item">
+
+          <span>👤</span>
+
+          <span>
+            Profil Saya
+          </span>
+
+        </button>
+
+
+        <button
+          onclick="navigate('directory')"
+          class="nav-item">
+
+          <span>👥</span>
+
+          <span>
+            Direktori Alumni
+          </span>
+
+        </button>
+
+
+        <button
+          onclick="navigate('cash')"
+          class="nav-item">
+
+          <span>💰</span>
+
+          <span>
+            Transparansi Kas
+          </span>
+
+        </button>
+
+
+
+        <!-- ADMIN -->
+
+        <div id="adminNavigation"
+             class="hidden pt-6">
+
+
+          <div class="px-3
+                      mb-2
+                      text-[10px]
+                      uppercase
+                      tracking-[.2em]
+                      text-slate-400">
+
+            Administrator
+
+          </div>
+
+
+          <button
+            onclick="navigate('adminAlumni')"
+            class="nav-item">
+
+            <span>⚙️</span>
+
+            <span>
+              Kelola Alumni
+            </span>
+
+          </button>
+
+
+          <button
+            onclick="navigate('adminCash')"
+            class="nav-item">
+
+            <span>📒</span>
+
+            <span>
+              Kelola Kas
+            </span>
+
+          </button>
+
+
+        </div>
+
+
+      </nav>
+
+    </div>
+
+
+
+    <!-- LOGOUT -->
+
+    <div class="absolute
+                bottom-0
+                left-0
+                right-0
+                p-5">
+
+
+      <button
+        onclick="logout()"
+        class="w-full
+               rounded-xl
+               bg-white/10
+               hover:bg-red-500/20
+               py-3
+               text-sm
+               transition">
+
+        🚪 Keluar
+
+      </button>
+
+    </div>
+
+
+  </aside>
+
+
+
+  <!-- MAIN -->
+
+  <main class="lg:ml-72
+               min-h-screen
+               p-4
+               md:p-8">
+
+
+    <!-- =================================================
+         DASHBOARD
+    ================================================= -->
+
+    <section
+      id="page-dashboard"
+      class="page">
+
+
+      <div class="mb-7">
+
+
+        <p class="text-sm
+                  text-slate-500">
+
+          Dashboard
+
+        </p>
+
+
+        <h1 class="text-3xl
+                   md:text-4xl
+                   font-black
+                   text-navy">
+
+          Halo,
+          <span id="dashboardName">
+          </span>
+
+        </h1>
+
+
+        <p class="text-slate-500
+                  mt-1">
+
+          Selamat datang di Alumni Portal.
+
+        </p>
+
+      </div>
+
+
+
+      <!-- STATISTICS -->
+
+      <div class="grid
+                  grid-cols-1
+                  sm:grid-cols-2
+                  xl:grid-cols-4
+                  gap-5">
+
+
+        <div class="bg-white
+                    rounded-3xl
+                    p-6
+                    shadow-sm">
+
+          <div class="text-slate-500
+                      text-sm">
+
+            Total Alumni
+
+          </div>
+
+
+          <div id="statTotal"
+               class="text-3xl
+                      font-black
+                      text-navy
+                      mt-2">
+
+            0
+
+          </div>
+
+        </div>
+
+
+        <div class="bg-white
+                    rounded-3xl
+                    p-6
+                    shadow-sm">
+
+          <div class="text-slate-500
+                      text-sm">
+
+            Active Sailing
+
+          </div>
+
+
+          <div id="statSailing"
+               class="text-3xl
+                      font-black
+                      text-sea
+                      mt-2">
+
+            0
+
+          </div>
+
+        </div>
+
+
+        <div class="bg-white
+                    rounded-3xl
+                    p-6
+                    shadow-sm">
+
+          <div class="text-slate-500
+                      text-sm">
+
+            Nautika
+
+          </div>
+
+
+          <div id="statNautika"
+               class="text-3xl
+                      font-black
+                      text-navy
+                      mt-2">
+
+            0
+
+          </div>
+
+        </div>
+
+
+        <div class="bg-white
+                    rounded-3xl
+                    p-6
+                    shadow-sm">
+
+          <div class="text-slate-500
+                      text-sm">
+
+            Teknika
+
+          </div>
+
+
+          <div id="statTeknika"
+               class="text-3xl
+                      font-black
+                      text-navy
+                      mt-2">
+
+            0
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+
+      <!-- CASH CARD -->
+
+      <div class="mt-6
+                  grid
+                  lg:grid-cols-3
+                  gap-5">
+
+
+        <div class="lg:col-span-2
+                    bg-navy
+                    text-white
+                    rounded-3xl
+                    p-7">
+
+
+          <div class="text-slate-300
+                      text-sm">
+
+            Saldo Kas Alumni
+
+          </div>
+
+
+          <div id="statSaldo"
+               class="text-3xl
+                      md:text-4xl
+                      font-black
+                      mt-3">
+
+            Rp0
+
+          </div>
+
+
+          <button
+            onclick="navigate('cash')"
+            class="mt-6
+                   bg-gold
+                   text-navy
+                   rounded-xl
+                   px-5 py-3
+                   font-bold">
+
+            Lihat Transparansi Kas
+
+          </button>
+
+        </div>
+
+
+        <div class="bg-white
+                    rounded-3xl
+                    p-7
+                    shadow-sm">
+
+
+          <div class="text-sm
+                      text-slate-500">
+
+            Status Layar Saya
+
+          </div>
+
+
+          <div id="statStatus"
+               class="text-xl
+                      font-black
+                      text-navy
+                      mt-3">
+
+          </div>
+
+
+          <div id="statKapal"
+               class="text-sm
+                      text-slate-500
+                      mt-2">
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         PROFILE
+    ================================================= -->
+
+    <section
+      id="page-profile"
+      class="page hidden">
+
+
+      <div class="mb-6">
+
+        <h1 class="text-3xl
+                   font-black
+                   text-navy">
+
+          Profil Saya
+
+        </h1>
+
+
+        <p class="text-slate-500">
+
+          Pastikan informasi Anda selalu terbaru.
+
+        </p>
+
+      </div>
+
+
+
+      <form
+        id="profileForm"
+        class="bg-white
+               rounded-3xl
+               p-6 md:p-8
+               shadow-sm">
+
+
+        <div class="grid
+                    md:grid-cols-2
+                    gap-5">
+
+
+          <div>
+
+            <label class="label">
+              Nama Lengkap
+            </label>
+
+            <input
+              id="profileNama"
+              class="input"
+              required>
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+              Email
+            </label>
+
+            <input
+              id="profileEmail"
+              class="input bg-slate-100"
+              disabled>
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+              WhatsApp
+            </label>
+
+            <input
+              id="profileWA"
+              class="input"
+              required>
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+              Jurusan
+            </label>
+
+            <select
+              id="profileJurusan"
+              class="input"
+              required>
+
+              <option>Nautika</option>
+
+              <option>Teknika</option>
+
+            </select>
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+              Angkatan
+            </label>
+
+            <input
+              id="profileAngkatan"
+              class="input"
+              placeholder="Contoh: 2012">
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+              Tingkat Ijazah
+            </label>
+
+            <input
+              id="profileIjazah"
+              class="input"
+              placeholder="ANT-IV / ATT-IV">
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+              Status Layar
+            </label>
+
+            <select
+              id="profileStatus"
+              class="input">
+
+              <option>
+                Active Sailing
+              </option>
+
+              <option>
+                Sign Off
+              </option>
+
+              <option>
+                On Land
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div>
+
+            <label class="label">
+              Nama Kapal / Perusahaan
+            </label>
+
+            <input
+              id="profileKapal"
+              class="input">
+
+          </div>
+
+
+          <div class="md:col-span-2">
+
+            <label class="label">
+              Sertifikat
+            </label>
+
+            <textarea
+              id="profileSertifikat"
+              rows="4"
+              class="input"
+              placeholder="BST, COP, COC, AFF, SAT, dll."></textarea>
+
+          </div>
+
+
+        </div>
+
+
+        <button
+          type="submit"
+          class="mt-6
+                 bg-navy
+                 text-white
+                 rounded-xl
+                 px-6 py-3
+                 font-bold">
+
+          Simpan Perubahan
+
+        </button>
+
+
+      </form>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         DIRECTORY
+    ================================================= -->
+
+    <section
+      id="page-directory"
+      class="page hidden">
+
+
+      <div class="mb-6">
+
+        <h1 class="text-3xl
+                   font-black
+                   text-navy">
+
+          Direktori Alumni
+
+        </h1>
+
+
+        <p class="text-slate-500">
+
+          Temukan alumni dan bangun networking.
+
+        </p>
+
+      </div>
+
+
+
+      <!-- FILTER -->
+
+      <div class="bg-white
+                  rounded-3xl
+                  p-4
+                  shadow-sm
+                  mb-5">
+
+
+        <div class="grid
+                    md:grid-cols-4
+                    gap-3">
+
+
+          <input
+            id="directorySearch"
+            oninput="filterDirectory()"
+            class="input"
+            placeholder="🔎 Cari nama...">
+
+
+          <select
+            id="directoryJurusan"
+            onchange="filterDirectory()"
+            class="input">
+
+            <option value="">
+              Semua Jurusan
+            </option>
+
+            <option>Nautika</option>
+
+            <option>Teknika</option>
+
+          </select>
+
+
+          <input
+            id="directoryAngkatan"
+            oninput="filterDirectory()"
+            class="input"
+            placeholder="Angkatan">
+
+
+          <select
+            id="directoryStatus"
+            onchange="filterDirectory()"
+            class="input">
+
+            <option value="">
+              Semua Status
+            </option>
+
+            <option>
+              Active Sailing
+            </option>
+
+            <option>
+              Sign Off
+            </option>
+
+            <option>
+              On Land
+            </option>
+
+          </select>
+
+
+        </div>
+
+      </div>
+
+
+
+      <div id="directoryGrid"
+           class="grid
+                  sm:grid-cols-2
+                  xl:grid-cols-3
+                  gap-5">
+
+      </div>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         CASH
+    ================================================= -->
+
+    <section
+      id="page-cash"
+      class="page hidden">
+
+
+      <div class="mb-6">
+
+        <h1 class="text-3xl
+                   font-black
+                   text-navy">
+
+          Transparansi Kas
+
+        </h1>
+
+
+        <p class="text-slate-500">
+
+          Informasi keuangan alumni secara transparan.
+
+        </p>
+
+      </div>
+
+
+
+      <div class="grid
+                  md:grid-cols-3
+                  gap-5
+                  mb-6">
+
+
+        <div class="bg-white
+                    rounded-3xl
+                    p-6
+                    shadow-sm">
+
+          <div class="text-sm
+                      text-slate-500">
+
+            Pemasukan
+
+          </div>
+
+
+          <div id="cashIncome"
+               class="text-2xl
+                      font-black
+                      text-emerald-600
+                      mt-2">
+
+            Rp0
+
+          </div>
+
+        </div>
+
+
+        <div class="bg-white
+                    rounded-3xl
+                    p-6
+                    shadow-sm">
+
+          <div class="text-sm
+                      text-slate-500">
+
+            Pengeluaran
+
+          </div>
+
+
+          <div id="cashExpense"
+               class="text-2xl
+                      font-black
+                      text-red-600
+                      mt-2">
+
+            Rp0
+
+          </div>
+
+        </div>
+
+
+        <div class="bg-navy
+                    text-white
+                    rounded-3xl
+                    p-6">
+
+          <div class="text-sm
+                      text-slate-300">
+
+            Saldo
+
+          </div>
+
+
+          <div id="cashBalance"
+               class="text-2xl
+                      font-black
+                      mt-2">
+
+            Rp0
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+
+      <div class="bg-white
+                  rounded-3xl
+                  shadow-sm
+                  overflow-hidden">
+
+
+        <div class="p-5
+                    border-b
+                    font-bold">
+
+          Riwayat Transaksi
+
+        </div>
+
+
+        <div class="overflow-x-auto">
+
+
+          <table class="w-full
+                        text-sm">
+
+
+            <thead class="bg-slate-50">
+
+
+              <tr>
+
+                <th class="p-4
+                           text-left">
+                  Tanggal
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Tipe
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Nominal
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Keterangan
+                </th>
+
+              </tr>
+
+
+            </thead>
+
+
+            <tbody id="cashTable">
+
+            </tbody>
+
+
+          </table>
+
+
+        </div>
+
+
+      </div>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         ADMIN ALUMNI
+    ================================================= -->
+
+    <section
+      id="page-adminAlumni"
+      class="page hidden">
+
+
+      <div class="flex
+                  flex-col
+                  md:flex-row
+                  md:items-center
+                  justify-between
+                  gap-4
+                  mb-6">
+
+
+        <div>
+
+          <h1 class="text-3xl
+                     font-black
+                     text-navy">
+
+            Kelola Alumni
+
+          </h1>
+
+
+          <p class="text-slate-500">
+
+            Kelola database alumni.
+
+          </p>
+
+        </div>
+
+
+        <button
+          onclick="openAlumniModal()"
+          class="bg-navy
+                 text-white
+                 rounded-xl
+                 px-5 py-3
+                 font-bold">
+
+          + Tambah Alumni
+
+        </button>
+
+
+      </div>
+
+
+
+      <!-- SEARCH -->
+
+      <div class="bg-white
+                  rounded-3xl
+                  p-4
+                  mb-5
+                  shadow-sm">
+
+
+        <input
+          id="adminAlumniSearch"
+          oninput="filterAdminAlumni()"
+          class="input"
+          placeholder="🔎 Cari nama, email, jurusan, angkatan...">
+
+      </div>
+
+
+
+      <div class="bg-white
+                  rounded-3xl
+                  shadow-sm
+                  overflow-hidden">
+
+
+        <div class="overflow-x-auto">
+
+
+          <table class="w-full
+                        text-sm">
+
+
+            <thead class="bg-navy
+                          text-white">
+
+
+              <tr>
+
+                <th class="p-4
+                           text-left">
+                  Alumni
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Jurusan
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Angkatan
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Status
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Layar
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Aksi
+                </th>
+
+              </tr>
+
+
+            </thead>
+
+
+            <tbody id="adminAlumniTable">
+
+            </tbody>
+
+
+          </table>
+
+
+        </div>
+
+
+      </div>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         ADMIN CASH
+    ================================================= -->
+
+    <section
+      id="page-adminCash"
+      class="page hidden">
+
+
+      <div class="flex
+                  flex-col
+                  md:flex-row
+                  md:items-center
+                  justify-between
+                  gap-4
+                  mb-6">
+
+
+        <div>
+
+          <h1 class="text-3xl
+                     font-black
+                     text-navy">
+
+            Kelola Kas
+
+          </h1>
+
+
+          <p class="text-slate-500">
+
+            Kelola pemasukan dan pengeluaran.
+
+          </p>
+
+        </div>
+
+
+        <div class="flex
+                    gap-2">
+
+
+          <button
+            onclick="openCashModal()"
+            class="bg-navy
+                   text-white
+                   rounded-xl
+                   px-5 py-3
+                   font-bold">
+
+            + Transaksi
+
+          </button>
+
+
+          <button
+            onclick="exportCashCSV()"
+            class="bg-gold
+                   text-navy
+                   rounded-xl
+                   px-5 py-3
+                   font-bold">
+
+            Export CSV
+
+          </button>
+
+
+        </div>
+
+
+      </div>
+
+
+
+      <!-- CASH STATS -->
+
+      <div class="grid
+                  md:grid-cols-3
+                  gap-5
+                  mb-6">
+
+
+        <div class="bg-white
+                    rounded-3xl
+                    p-6">
+
+          <div class="text-sm
+                      text-slate-500">
+
+            Pemasukan
+
+          </div>
+
+
+          <div id="adminIncome"
+               class="text-2xl
+                      font-black
+                      text-emerald-600
+                      mt-2">
+
+            Rp0
+
+          </div>
+
+        </div>
+
+
+        <div class="bg-white
+                    rounded-3xl
+                    p-6">
+
+          <div class="text-sm
+                      text-slate-500">
+
+            Pengeluaran
+
+          </div>
+
+
+          <div id="adminExpense"
+               class="text-2xl
+                      font-black
+                      text-red-600
+                      mt-2">
+
+            Rp0
+
+          </div>
+
+        </div>
+
+
+        <div class="bg-navy
+                    text-white
+                    rounded-3xl
+                    p-6">
+
+          <div class="text-sm
+                      text-slate-300">
+
+            Saldo
+
+          </div>
+
+
+          <div id="adminBalance"
+               class="text-2xl
+                      font-black
+                      mt-2">
+
+            Rp0
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+
+      <!-- TABLE -->
+
+      <div class="bg-white
+                  rounded-3xl
+                  shadow-sm
+                  overflow-hidden">
+
+
+        <div class="overflow-x-auto">
+
+
+          <table class="w-full
+                        text-sm">
+
+
+            <thead class="bg-slate-50">
+
+
+              <tr>
+
+                <th class="p-4
+                           text-left">
+                  Tanggal
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Tipe
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Nominal
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Keterangan
+                </th>
+
+                <th class="p-4
+                           text-left">
+                  Aksi
+                </th>
+
+              </tr>
+
+
+            </thead>
+
+
+            <tbody id="adminCashTable">
+
+            </tbody>
+
+
+          </table>
+
+
+        </div>
+
+
+      </div>
+
+
+    </section>
+
+
+  </main>
+
+</div>
+
+
+
+<!-- =====================================================
+     ALUMNI MODAL
+===================================================== -->
+
+<div id="alumniModal"
+     class="hidden
+            fixed
+            inset-0
+            z-[100]
+            modal-backdrop
+            items-center
+            justify-center
+            p-4">
+
+
+  <div class="bg-white
+              rounded-3xl
+              w-full
+              max-w-3xl
+              max-h-[90vh]
+              overflow-y-auto">
+
+
+    <div class="p-6
+                border-b
+                flex
+                justify-between
+                items-center">
+
+
+      <div>
+
+        <h2 id="alumniModalTitle"
+            class="text-xl
+                   font-black
+                   text-navy">
+
+          Tambah Alumni
+
+        </h2>
+
+
+        <p class="text-sm
+                  text-slate-500">
+
+          Kelola data alumni.
+
+        </p>
+
+      </div>
+
+
+      <button
+        onclick="closeAlumniModal()"
+        class="text-xl">
+
+        ✕
+
+      </button>
+
+
+    </div>
+
+
+
+    <form
+      id="alumniForm"
+      class="p-6">
+
+
+      <input
+        type="hidden"
+        id="alumniId">
+
+
+      <div class="grid
+                  md:grid-cols-2
+                  gap-5">
+
+
+        <div>
+
+          <label class="label">
+            Nama Lengkap
+          </label>
+
+          <input
+            id="alumniNama"
+            class="input"
+            required>
+
+        </div>
+
+
+        <div>
+
+          <label class="label">
+            Email
+          </label>
+
+          <input
+            id="alumniEmail"
+            type="email"
+            class="input"
+            required>
+
+        </div>
+
+
+        <div>
+
+          <label class="label">
+            WhatsApp
+          </label>
+
+          <input
+            id="alumniWA"
+            class="input"
+            required>
+
+        </div>
+
+
+        <div>
+
+          <label class="label">
+            Jurusan
+          </label>
+
+          <select
+            id="alumniJurusan"
+            class="input">
+
+            <option>Nautika</option>
+
+            <option>Teknika</option>
+
+          </select>
+
+        </div>
+
+
+        <div>
+
+          <label class="label">
+            Angkatan
+          </label>
+
+          <input
+            id="alumniAngkatan"
+            class="input">
+
+        </div>
+
+
+        <div>
+
+          <label class="label">
+            Tingkat Ijazah
+          </label>
+
+          <input
+            id="alumniIjazah"
+            class="input">
+
+        </div>
+
+
+        <div>
+
+          <label class="label">
+            Status Layar
+          </label>
+
+          <select
+            id="alumniStatusLayar"
+            class="input">
+
+            <option>
+              Active Sailing
+            </option>
+
+            <option>
+              Sign Off
+            </option>
+
+            <option>
+              On Land
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div>
+
+          <label class="label">
+            Status Akun
+          </label>
+
+          <select
+            id="alumniStatus"
+            class="input">
+
+            <option>
+              Aktif
+            </option>
+
+            <option>
+              Blocked
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="md:col-span-2">
+
+          <label class="label">
+            Nama Kapal / Perusahaan
+          </label>
+
+          <input
+            id="alumniKapal"
+            class="input">
+
+        </div>
+
+
+        <div class="md:col-span-2">
+
+          <label class="label">
+            Sertifikat
+          </label>
+
+          <textarea
+            id="alumniSertifikat"
+            rows="3"
+            class="input"></textarea>
+
+        </div>
+
+
+        <div class="md:col-span-2">
+
+          <label class="label">
+
+            Password
+
+            <span id="passwordHelp"
+                  class="font-normal
+                         text-slate-400">
+
+              (wajib untuk alumni baru)
+
+            </span>
+
+          </label>
+
+
+          <input
+            id="alumniPassword"
+            type="password"
+            class="input"
+            minlength="8"
+            placeholder="Minimal 8 karakter">
+
+        </div>
+
+
+      </div>
+
+
+
+      <div class="mt-6
+                  flex
+                  justify-end
+                  gap-3">
+
+
+        <button
+          type="button"
+          onclick="closeAlumniModal()"
+          class="px-5 py-3
+                 rounded-xl
+                 border
+                 border-slate-300">
+
+          Batal
+
+        </button>
+
+
+        <button
+          type="submit"
+          class="px-5 py-3
+                 rounded-xl
+                 bg-navy
+                 text-white
+                 font-bold">
+
+          Simpan
+
+        </button>
+
+
+      </div>
+
+
+    </form>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     CASH MODAL
+===================================================== -->
+
+<div id="cashModal"
+     class="hidden
+            fixed
+            inset-0
+            z-[100]
+            modal-backdrop
+            items-center
+            justify-center
+            p-4">
+
+
+  <div class="bg-white
+              rounded-3xl
+              w-full
+              max-w-lg">
+
+
+    <div class="p-6
+                border-b
+                flex
+                justify-between">
+
+
+      <h2 id="cashModalTitle"
+          class="text-xl
+                 font-black
+                 text-navy">
+
+        Tambah Transaksi
+
+      </h2>
+
+
+      <button
+        onclick="closeCashModal()">
+
+        ✕
+
+      </button>
+
+
+    </div>
+
+
+    <form
+      id="cashForm"
+      class="p-6
+             space-y-4">
+
+
+      <input
+        type="hidden"
+        id="cashId">
+
+
+      <div>
+
+        <label class="label">
+          Tanggal
+        </label>
+
+        <input
+          id="cashTanggal"
+          type="date"
+          class="input"
+          required>
+
+      </div>
+
+
+      <div>
+
+        <label class="label">
+          Tipe
+        </label>
+
+        <select
+          id="cashTipe"
+          class="input">
+
+          <option>
+            Pemasukan
+          </option>
+
+          <option>
+            Pengeluaran
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div>
+
+        <label class="label">
+          Nominal
+        </label>
+
+        <input
+          id="cashNominal"
+          type="number"
+          min="1"
+          class="input"
+          required>
+
+      </div>
+
+
+      <div>
+
+        <label class="label">
+          Keterangan
+        </label>
+
+        <textarea
+          id="cashKeterangan"
+          rows="4"
+          class="input"
+          required></textarea>
+
+      </div>
+
+
+      <div class="flex
+                  justify-end
+                  gap-3
+                  pt-2">
+
+
+        <button
+          type="button"
+          onclick="closeCashModal()"
+          class="px-5 py-3
+                 rounded-xl
+                 border">
+
+          Batal
+
+        </button>
+
+
+        <button
+          type="submit"
+          class="px-5 py-3
+                 rounded-xl
+                 bg-navy
+                 text-white
+                 font-bold">
+
+          Simpan
+
+        </button>
+
+
+      </div>
+
+
+    </form>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+
+<div id="toast"
+     class="hidden
+            fixed
+            right-5
+            bottom-5
+            z-[200]
+            max-w-sm
+            rounded-2xl
+            px-5 py-4
+            text-white
+            shadow-2xl">
+
+</div>
+
+
+
+<script src="js/app.js" defer></script>
+
+
+</body>
+
+</html>
