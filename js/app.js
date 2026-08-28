@@ -76,6 +76,8 @@ function server(functionName, ...args) {
 
       const response = await fetch(API_URL, {
         method: 'POST',
+        redirect: 'follow',
+        cache: 'no-store',
         headers: {
           // text/plain menghindari preflight CORS pada Web App GAS.
           'Content-Type': 'text/plain;charset=utf-8'
@@ -90,7 +92,17 @@ function server(functionName, ...args) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const result = await response.json();
+      const rawText = await response.text();
+      let result;
+
+      try {
+        result = JSON.parse(rawText);
+      } catch (parseError) {
+        console.error('Respons API bukan JSON:', rawText);
+        throw new Error(
+          'Respons dari Google Apps Script tidak valid. Pastikan deployment GAS menggunakan versi terbaru dan URL /exec benar.'
+        );
+      }
 
       if (!result || result.success === false) {
         throw new Error(
@@ -133,6 +145,14 @@ function showLogin() {
       'hidden'
     );
 
+  document
+    .getElementById(
+      'forgotPasswordBox'
+    )
+    .classList.add(
+      'hidden'
+    );
+
 }
 
 
@@ -152,6 +172,14 @@ function showRegister() {
       'registerBox'
     )
     .classList.remove(
+      'hidden'
+    );
+
+  document
+    .getElementById(
+      'forgotPasswordBox'
+    )
+    .classList.add(
       'hidden'
     );
 
@@ -982,8 +1010,6 @@ function closeSidebar() {
 
 }
 
-
-
 /* =====================================================
    DASHBOARD
 ===================================================== */
@@ -1043,7 +1069,6 @@ async function loadDashboard() {
       .textContent =
         stats.teknika;
 
-
     document
       .getElementById(
         'statSaldo'
@@ -1074,7 +1099,6 @@ async function loadDashboard() {
 
     CURRENT_USER =
       result.user;
-
 
     localStorage.setItem(
       'alumni_user',
@@ -1114,7 +1138,6 @@ async function loadProfile() {
     CURRENT_USER =
       result.user;
 
-
     localStorage.setItem(
       'alumni_user',
       JSON.stringify(
@@ -1124,7 +1147,6 @@ async function loadProfile() {
 
 
     fillProfile();
-
 
     renderUser();
 
@@ -1237,7 +1259,6 @@ document
 
 
       try {
-
         const result =
           await server(
             'updateOwnProfile',
@@ -1259,7 +1280,6 @@ document
                     'profileWA'
                   )
                   .value,
-
               jurusan:
                 document
                   .getElementById(
@@ -1305,10 +1325,8 @@ document
             }
           );
 
-
         CURRENT_USER =
           result.user;
-
 
         localStorage.setItem(
           'alumni_user',
@@ -1317,15 +1335,12 @@ document
           )
         );
 
-
         renderUser();
 
-
         showToast(
-          'Profil berhasil diperbarui.',
+          result.message,
           'success'
         );
-
 
       } catch (error) {
 
@@ -1337,7 +1352,6 @@ document
 
     }
   );
-
 
 
 /* =====================================================
@@ -1356,12 +1370,10 @@ async function loadDirectory() {
 
 
     DIRECTORY_DATA =
-      result.data;
+      result.data || [];
 
 
-    renderDirectory(
-      DIRECTORY_DATA
-    );
+    filterDirectory();
 
 
   } catch (error) {
@@ -1383,7 +1395,8 @@ function filterDirectory() {
         'directorySearch'
       )
       .value
-      .toLowerCase();
+      .toLowerCase()
+      .trim();
 
 
   const jurusan =
@@ -1400,7 +1413,8 @@ function filterDirectory() {
         'directoryAngkatan'
       )
       .value
-      .toLowerCase();
+      .toLowerCase()
+      .trim();
 
 
   const status =
@@ -1413,53 +1427,43 @@ function filterDirectory() {
 
   const filtered =
     DIRECTORY_DATA.filter(
-      alumni => {
-
+      item => {
 
         const matchesSearch =
-
+          !search ||
           String(
-            alumni.nama
+            item.nama || ''
           )
             .toLowerCase()
             .includes(
               search
             );
 
-
         const matchesJurusan =
-
           !jurusan ||
-          alumni.jurusan ===
+          item.jurusan ===
             jurusan;
 
-
         const matchesAngkatan =
-
           !angkatan ||
           String(
-            alumni.angkatan
+            item.angkatan || ''
           )
             .toLowerCase()
             .includes(
               angkatan
             );
 
-
         const matchesStatus =
-
           !status ||
-          alumni.status_layar ===
+          item.status_layar ===
             status;
 
-
         return (
-
           matchesSearch &&
           matchesJurusan &&
           matchesAngkatan &&
           matchesStatus
-
         );
 
       }
@@ -1477,188 +1481,88 @@ function renderDirectory(
   data
 ) {
 
-  const grid =
+  const tbody =
     document
       .getElementById(
-        'directoryGrid'
+        'directoryTableBody'
       );
 
 
-  if (!data.length) {
-
-    grid.innerHTML = `
-
-      <div class="
-        col-span-full
-        bg-white
-        rounded-3xl
-        p-12
-        text-center
-        text-slate-500">
-
-        Tidak ada alumni yang ditemukan.
-
-      </div>
-
-    `;
-
-    return;
-
-  }
+  const cards =
+    document
+      .getElementById(
+        'directoryCards'
+      );
 
 
-  grid.innerHTML =
-    data
-      .map(
-        alumni => `
-
-          <div class="
-            bg-white
-            rounded-3xl
-            p-6
-            shadow-sm
-            hover:shadow-md
-            transition">
-
-            <div class="
-              flex
-              items-start
-              justify-between
-              gap-3">
-
-              <div>
-
-                <div class="
-                  font-black
-                  text-lg
-                  text-navy">
-
-                  ${escapeHtml(
-                    alumni.nama
-                  )}
-
-                </div>
-
-                <div class="
-                  text-sm
-                  text-slate-500
-                  mt-1">
-
-                  ${escapeHtml(
-                    alumni.jurusan ||
-                    '-'
-                  )}
-
-                  ·
-
-                  ${escapeHtml(
-                    alumni.angkatan ||
-                    '-'
-                  )}
-
-                </div>
-
-              </div>
+  tbody.innerHTML = '';
+  cards.innerHTML = '';
 
 
-              <div class="
-                w-10 h-10
-                rounded-xl
-                bg-slate-100
-                flex
-                items-center
-                justify-center">
+  data.forEach(
+    item => {
 
-                ⚓
+      tbody.innerHTML += `
 
-              </div>
+        <tr class="border-b">
 
-            </div>
+          <td class="py-3 font-semibold">
+            ${escapeHtml(item.nama)}
+          </td>
 
+          <td class="py-3">
+            ${escapeHtml(item.jurusan)}
+          </td>
 
-            <div class="
-              mt-5
-              space-y-3
-              text-sm">
+          <td class="py-3">
+            ${escapeHtml(item.angkatan || '-')}
+          </td>
 
+          <td class="py-3">
+            ${escapeHtml(item.status_layar || '-')}
+          </td>
 
-              <div>
+          <td class="py-3">
+            ${escapeHtml(item.nama_kapal || '-')}
+          </td>
 
-                <span class="
-                  text-slate-400">
+        </tr>
 
-                  Status Layar
+      `;
 
-                </span>
+      cards.innerHTML += `
 
-                <div class="
-                  font-semibold
-                  text-navy">
+        <div class="bg-white rounded-2xl p-5 shadow-sm">
 
-                  ${escapeHtml(
-                    alumni.status_layar ||
-                    '-'
-                  )}
-
-                </div>
-
-              </div>
-
-
-              <div>
-
-                <span class="
-                  text-slate-400">
-
-                  Ijazah
-
-                </span>
-
-                <div class="
-                  font-semibold">
-
-                  ${escapeHtml(
-                    alumni.tingkat_ijazah ||
-                    '-'
-                  )}
-
-                </div>
-
-              </div>
-
-
-              <div>
-
-                <span class="
-                  text-slate-400">
-
-                  Kapal / Perusahaan
-
-                </span>
-
-                <div class="
-                  font-semibold">
-
-                  ${escapeHtml(
-                    alumni.nama_kapal ||
-                    '-'
-                  )}
-
-                </div>
-
-              </div>
-
-
-            </div>
-
+          <div class="font-black text-navy">
+            ${escapeHtml(item.nama)}
           </div>
 
-        `
-      )
-      .join('');
+          <div class="text-sm text-slate-500 mt-1">
+            ${escapeHtml(item.jurusan)} · ${escapeHtml(item.angkatan || '-')}
+          </div>
+
+          <div class="mt-3 text-sm">
+            <div><b>Status:</b> ${escapeHtml(item.status_layar || '-')}</div>
+            <div><b>Kapal:</b> ${escapeHtml(item.nama_kapal || '-')}</div>
+          </div>
+
+        </div>
+
+      `;
+
+    }
+  );
+
+
+  document
+    .getElementById(
+      'directoryCount'
+    )
+    .textContent =
+      data.length;
 
 }
-
 
 
 /* =====================================================
@@ -1669,60 +1573,57 @@ async function loadCash() {
 
   try {
 
-    const [
-      summary,
-      transactions
-    ] =
-      await Promise.all([
-
-        server(
-          'getCashSummary',
-          TOKEN
-        ),
-
-        server(
-          'getCashTransactions',
-          TOKEN
-        )
-
-      ]);
+    const summary =
+      await server(
+        'getCashSummary',
+        TOKEN
+      );
 
 
     document
       .getElementById(
-        'cashIncome'
+        'cashSaldo'
       )
       .textContent =
         formatRupiah(
-          summary.summary.pemasukan
+          summary.saldo
         );
 
 
     document
       .getElementById(
-        'cashExpense'
+        'cashPemasukan'
       )
       .textContent =
         formatRupiah(
-          summary.summary.pengeluaran
+          summary.pemasukan
         );
 
 
     document
       .getElementById(
-        'cashBalance'
+        'cashPengeluaran'
       )
       .textContent =
         formatRupiah(
-          summary.summary.saldo
+          summary.pengeluaran
         );
+
+
+    const result =
+      await server(
+        'getCashTransactions',
+        TOKEN
+      );
 
 
     CASH_DATA =
-      transactions.data;
+      result.data || [];
 
 
-    renderCashTable();
+    renderCash(
+      CASH_DATA
+    );
 
 
   } catch (error) {
@@ -1736,112 +1637,56 @@ async function loadCash() {
 }
 
 
-function renderCashTable() {
+function renderCash(
+  data
+) {
 
   const tbody =
     document
       .getElementById(
-        'cashTable'
+        'cashTableBody'
       );
 
 
-  if (!CASH_DATA.length) {
-
-    tbody.innerHTML = `
-
-      <tr>
-
-        <td colspan="4"
-            class="
-              p-10
-              text-center
-              text-slate-500">
-
-          Belum ada transaksi.
-
-        </td>
-
-      </tr>
-
-    `;
-
-    return;
-
-  }
+  tbody.innerHTML = '';
 
 
-  tbody.innerHTML =
-    CASH_DATA
-      .map(
-        tx => `
+  data.forEach(
+    tx => {
 
-          <tr class="
-            border-t
-            hover:bg-slate-50">
+      tbody.innerHTML += `
 
-            <td class="p-4">
+        <tr class="border-b">
 
-              ${escapeHtml(
-                tx.tanggal
-              )}
+          <td class="py-3">
+            ${escapeHtml(tx.tanggal)}
+          </td>
 
-            </td>
+          <td class="py-3">
+            <span class="rounded-full px-3 py-1 text-xs font-bold
+              ${tx.tipe === 'Pemasukan'
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-red-100 text-red-700'}">
+              ${escapeHtml(tx.tipe)}
+            </span>
+          </td>
 
+          <td class="py-3 font-semibold">
+            ${formatRupiah(tx.nominal)}
+          </td>
 
-            <td class="p-4">
+          <td class="py-3">
+            ${escapeHtml(tx.keterangan)}
+          </td>
 
-              <span class="
-                inline-block
-                px-2 py-1
-                rounded-full
-                text-xs
-                font-bold
-                ${
-                  tx.tipe ===
-                  'Pemasukan'
+        </tr>
 
-                  ? 'bg-emerald-100 text-emerald-700'
+      `;
 
-                  : 'bg-red-100 text-red-700'
-                }">
-
-                ${escapeHtml(
-                  tx.tipe
-                )}
-
-              </span>
-
-            </td>
-
-
-            <td class="
-              p-4
-              font-bold">
-
-              ${formatRupiah(
-                tx.nominal
-              )}
-
-            </td>
-
-
-            <td class="p-4">
-
-              ${escapeHtml(
-                tx.keterangan
-              )}
-
-            </td>
-
-
-          </tr>
-
-        `
-      )
-      .join('');
+    }
+  );
 
 }
-
 
 
 /* =====================================================
@@ -1860,7 +1705,7 @@ async function loadAdminAlumni() {
 
 
     ADMIN_ALUMNI_DATA =
-      result.data;
+      result.data || [];
 
 
     renderAdminAlumni(
@@ -1879,55 +1724,6 @@ async function loadAdminAlumni() {
 }
 
 
-function filterAdminAlumni() {
-
-  const search =
-    document
-      .getElementById(
-        'adminAlumniSearch'
-      )
-      .value
-      .toLowerCase();
-
-
-  const filtered =
-    ADMIN_ALUMNI_DATA.filter(
-      alumni => {
-
-        return [
-
-          alumni.nama,
-
-          alumni.email,
-
-          alumni.wa,
-
-          alumni.jurusan,
-
-          alumni.angkatan,
-
-          alumni.status_layar,
-
-          alumni.nama_kapal
-
-        ]
-          .join(' ')
-          .toLowerCase()
-          .includes(
-            search
-          );
-
-      }
-    );
-
-
-  renderAdminAlumni(
-    filtered
-  );
-
-}
-
-
 function renderAdminAlumni(
   data
 ) {
@@ -1935,220 +1731,71 @@ function renderAdminAlumni(
   const tbody =
     document
       .getElementById(
-        'adminAlumniTable'
+        'adminAlumniTableBody'
       );
 
 
-  if (!data.length) {
+  tbody.innerHTML = '';
 
-    tbody.innerHTML = `
 
-      <tr>
+  data.forEach(
+    item => {
 
-        <td colspan="6"
-            class="
-              p-10
-              text-center
-              text-slate-500">
+      tbody.innerHTML += `
 
-          Tidak ada data alumni.
+        <tr class="border-b">
 
-        </td>
+          <td class="py-3 font-semibold">
+            ${escapeHtml(item.nama)}
+          </td>
 
-      </tr>
+          <td class="py-3">
+            ${escapeHtml(item.email)}
+          </td>
 
-    `;
+          <td class="py-3">
+            ${escapeHtml(item.jurusan)}
+          </td>
 
-    return;
+          <td class="py-3">
+            ${escapeHtml(item.angkatan || '-')}
+          </td>
 
-  }
+          <td class="py-3">
+            ${escapeHtml(item.status)}
+          </td>
 
+          <td class="py-3">
+            <div class="flex flex-wrap gap-2">
 
-  tbody.innerHTML =
-    data
-      .map(
-        alumni => `
+              <button
+                onclick="editAlumni('${escapeJs(item.id)}')"
+                class="text-xs px-3 py-2 rounded-lg bg-slate-100">
+                Edit
+              </button>
 
-          <tr class="
-            border-t
-            hover:bg-slate-50">
+              ${item.status === 'Blocked'
+                ? `<button onclick="unblockAlumni('${escapeJs(item.id)}')" class="text-xs px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700">Aktifkan</button>`
+                : `<button onclick="blockAlumni('${escapeJs(item.id)}')" class="text-xs px-3 py-2 rounded-lg bg-amber-100 text-amber-700">Blokir</button>`}
 
+              ${item.role !== 'Admin'
+                ? `<button onclick="deleteAlumni('${escapeJs(item.id)}')" class="text-xs px-3 py-2 rounded-lg bg-red-100 text-red-700">Hapus</button>`
+                : ''}
 
-            <td class="p-4">
+            </div>
+          </td>
 
-              <div class="
-                font-bold
-                text-navy">
+        </tr>
 
-                ${escapeHtml(
-                  alumni.nama
-                )}
+      `;
 
-              </div>
-
-              <div class="
-                text-xs
-                text-slate-500">
-
-                ${escapeHtml(
-                  alumni.email
-                )}
-
-              </div>
-
-            </td>
-
-
-            <td class="p-4">
-
-              ${escapeHtml(
-                alumni.jurusan ||
-                '-'
-              )}
-
-            </td>
-
-
-            <td class="p-4">
-
-              ${escapeHtml(
-                alumni.angkatan ||
-                '-'
-              )}
-
-            </td>
-
-
-            <td class="p-4">
-
-              <span class="
-                inline-block
-                rounded-full
-                px-2 py-1
-                text-xs
-                font-bold
-                ${
-                  alumni.status ===
-                  'Aktif'
-
-                  ? 'bg-emerald-100 text-emerald-700'
-
-                  : 'bg-red-100 text-red-700'
-                }">
-
-                ${escapeHtml(
-                  alumni.status
-                )}
-
-              </span>
-
-            </td>
-
-
-            <td class="p-4">
-
-              ${escapeHtml(
-                alumni.status_layar ||
-                '-'
-              )}
-
-            </td>
-
-
-            <td class="p-4">
-
-              <div class="
-                flex
-                gap-2
-                flex-wrap">
-
-
-                <button
-                  onclick="editAlumni('${escapeJs(alumni.id)}')"
-                  class="
-                    px-3 py-2
-                    rounded-lg
-                    bg-slate-100
-                    text-navy
-                    font-semibold">
-
-                  Edit
-
-                </button>
-
-
-                ${
-                  alumni.status ===
-                  'Blocked'
-
-                  ?
-
-                  `<button
-                    onclick="unblockAlumni('${escapeJs(alumni.id)}')"
-                    class="
-                      px-3 py-2
-                      rounded-lg
-                      bg-emerald-100
-                      text-emerald-700
-                      font-semibold">
-
-                    Aktifkan
-
-                  </button>`
-
-                  :
-
-                  `<button
-                    onclick="blockAlumni('${escapeJs(alumni.id)}')"
-                    class="
-                      px-3 py-2
-                      rounded-lg
-                      bg-amber-100
-                      text-amber-700
-                      font-semibold">
-
-                    Block
-
-                  </button>`
-                }
-
-
-                <button
-                  onclick="deleteAlumni('${escapeJs(alumni.id)}')"
-                  class="
-                    px-3 py-2
-                    rounded-lg
-                    bg-red-100
-                    text-red-700
-                    font-semibold">
-
-                  Hapus
-
-                </button>
-
-
-              </div>
-
-            </td>
-
-
-          </tr>
-
-        `
-      )
-      .join('');
+    }
+  );
 
 }
 
 
-
-/* =====================================================
-   ALUMNI MODAL
-===================================================== */
-
-function openAlumniModal(
-  alumni = null
-) {
+function openAlumniModal(id = '') {
 
   const modal =
     document
@@ -2156,15 +1803,11 @@ function openAlumniModal(
         'alumniModal'
       );
 
-
-  modal.classList.remove(
-    'hidden'
-  );
-
-  modal.classList.add(
-    'flex'
-  );
-
+  document
+    .getElementById(
+      'alumniId'
+    )
+    .value = id;
 
   document
     .getElementById(
@@ -2172,180 +1815,62 @@ function openAlumniModal(
     )
     .reset();
 
+  if (id) {
+    const item =
+      ADMIN_ALUMNI_DATA.find(
+        x => x.id === id
+      );
 
-  document
-    .getElementById(
-      'alumniId'
-    )
-    .value =
-      alumni
-        ? alumni.id
-        : '';
-
+    if (item) {
+      document.getElementById('alumniNama').value = item.nama || '';
+      document.getElementById('alumniEmail').value = item.email || '';
+      document.getElementById('alumniWA').value = item.wa || '';
+      document.getElementById('alumniJurusan').value = item.jurusan || 'Nautika';
+      document.getElementById('alumniAngkatan').value = item.angkatan || '';
+      document.getElementById('alumniIjazah').value = item.tingkat_ijazah || '';
+      document.getElementById('alumniStatusLayar').value = item.status_layar || 'On Land';
+      document.getElementById('alumniKapal').value = item.nama_kapal || '';
+      document.getElementById('alumniSertifikat').value = item.sertifikat || '';
+      document.getElementById('alumniRole').value = item.role || 'Alumni';
+      document.getElementById('alumniStatus').value = item.status || 'Aktif';
+    }
+  } else {
+    document.getElementById('alumniRole').value = 'Alumni';
+    document.getElementById('alumniStatus').value = 'Aktif';
+  }
 
   document
     .getElementById(
       'alumniModalTitle'
     )
-    .textContent =
-      alumni
-        ? 'Edit Data Alumni'
-        : 'Tambah Alumni';
-
+    .textContent = id
+      ? 'Edit Alumni'
+      : 'Tambah Alumni';
 
   document
     .getElementById(
       'passwordHelp'
     )
-    .textContent =
-      alumni
-        ? '(kosongkan jika tidak ingin mengganti)'
-        : '(wajib untuk alumni baru)';
+    .textContent = id
+      ? '(isi hanya jika ingin mengganti password)'
+      : '(wajib untuk alumni baru)';
 
-
-  if (!alumni) {
-
-    document
-      .getElementById(
-        'alumniStatus'
-      )
-      .value =
-        'Aktif';
-
-    return;
-
-  }
-
-
-  document
-    .getElementById(
-      'alumniNama'
-    )
-    .value =
-      alumni.nama || '';
-
-
-  document
-    .getElementById(
-      'alumniEmail'
-    )
-    .value =
-      alumni.email || '';
-
-
-  document
-    .getElementById(
-      'alumniWA'
-    )
-    .value =
-      alumni.wa || '';
-
-
-  document
-    .getElementById(
-      'alumniJurusan'
-    )
-    .value =
-      alumni.jurusan ||
-      'Nautika';
-
-
-  document
-    .getElementById(
-      'alumniAngkatan'
-    )
-    .value =
-      alumni.angkatan || '';
-
-
-  document
-    .getElementById(
-      'alumniIjazah'
-    )
-    .value =
-      alumni.tingkat_ijazah ||
-      '';
-
-
-  document
-    .getElementById(
-      'alumniStatusLayar'
-    )
-    .value =
-      alumni.status_layar ||
-      'On Land';
-
-
-  document
-    .getElementById(
-      'alumniStatus'
-    )
-    .value =
-      alumni.status ||
-      'Aktif';
-
-
-  document
-    .getElementById(
-      'alumniKapal'
-    )
-    .value =
-      alumni.nama_kapal ||
-      '';
-
-
-  document
-    .getElementById(
-      'alumniSertifikat'
-    )
-    .value =
-      alumni.sertifikat ||
-      '';
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
 
 }
 
 
 function closeAlumniModal() {
-
-  const modal =
-    document
-      .getElementById(
-        'alumniModal'
-      );
-
-
-  modal.classList.add(
-    'hidden'
-  );
-
-  modal.classList.remove(
-    'flex'
-  );
-
+  const modal = document.getElementById('alumniModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
 }
 
 
-function editAlumni(
-  id
-) {
-
-  const alumni =
-    ADMIN_ALUMNI_DATA.find(
-      item =>
-        item.id === id
-    );
-
-
-  if (alumni) {
-
-    openAlumniModal(
-      alumni
-    );
-
-  }
-
+function editAlumni(id) {
+  openAlumniModal(id);
 }
-
 
 
 document
@@ -2358,177 +1883,54 @@ document
 
       event.preventDefault();
 
-
-      const id =
-        document
-          .getElementById(
-            'alumniId'
-          )
-          .value;
-
-
-      const data = {
-
-        token:
-          TOKEN,
-
-        nama:
-          document
-            .getElementById(
-              'alumniNama'
-            )
-            .value,
-
-        email:
-          document
-            .getElementById(
-              'alumniEmail'
-            )
-            .value,
-
-        wa:
-          document
-            .getElementById(
-              'alumniWA'
-            )
-            .value,
-
-        jurusan:
-          document
-            .getElementById(
-              'alumniJurusan'
-            )
-            .value,
-
-        angkatan:
-          document
-            .getElementById(
-              'alumniAngkatan'
-            )
-            .value,
-
-        tingkat_ijazah:
-          document
-            .getElementById(
-              'alumniIjazah'
-            )
-            .value,
-
-        status_layar:
-          document
-            .getElementById(
-              'alumniStatusLayar'
-            )
-            .value,
-
-        status:
-          document
-            .getElementById(
-              'alumniStatus'
-            )
-            .value,
-
-        nama_kapal:
-          document
-            .getElementById(
-              'alumniKapal'
-            )
-            .value,
-
-        sertifikat:
-          document
-            .getElementById(
-              'alumniSertifikat'
-            )
-            .value,
-
-        password:
-          document
-            .getElementById(
-              'alumniPassword'
-            )
-            .value
-
+      const id = document.getElementById('alumniId').value;
+      const password = document.getElementById('alumniPassword').value;
+      const payload = {
+        token: TOKEN,
+        id,
+        nama: document.getElementById('alumniNama').value,
+        email: document.getElementById('alumniEmail').value,
+        wa: document.getElementById('alumniWA').value,
+        jurusan: document.getElementById('alumniJurusan').value,
+        angkatan: document.getElementById('alumniAngkatan').value,
+        tingkat_ijazah: document.getElementById('alumniIjazah').value,
+        status_layar: document.getElementById('alumniStatusLayar').value,
+        nama_kapal: document.getElementById('alumniKapal').value,
+        sertifikat: document.getElementById('alumniSertifikat').value,
+        role: document.getElementById('alumniRole').value,
+        status: document.getElementById('alumniStatus').value
       };
 
+      if (password) {
+        payload.password = password;
+      }
 
       try {
-
-        if (id) {
-
-          data.id =
-            id;
-
-
-          await server(
-            'adminUpdateAlumni',
-            data
-          );
-
-
-          showToast(
-            'Data alumni berhasil diperbarui.',
-            'success'
-          );
-
-
-        } else {
-
-          await server(
-            'adminCreateAlumni',
-            data
-          );
-
-
-          showToast(
-            'Alumni berhasil ditambahkan.',
-            'success'
-          );
-
-        }
-
-
-        closeAlumniModal();
-
-
-        loadAdminAlumni();
-
-
-      } catch (error) {
-
-        handleError(
-          error
+        const result = await server(
+          id ? 'adminUpdateAlumni' : 'adminCreateAlumni',
+          payload
         );
 
+        closeAlumniModal();
+        await loadAdminAlumni();
+        showToast(result.message, 'success');
+
+      } catch (error) {
+        handleError(error);
       }
 
     }
   );
 
 
+async function blockAlumni(id) {
 
-/* =====================================================
-   BLOCK / UNBLOCK / DELETE
-===================================================== */
-
-async function blockAlumni(
-  id
-) {
-
-  if (
-    !confirm(
-      'Blokir alumni ini? Alumni tidak dapat login selama diblokir.'
-    )
-  ) {
-
+  if (!confirm('Blokir alumni ini?')) {
     return;
-
   }
 
-
   try {
-
-    await server(
+    const result = await server(
       'adminBlockAlumni',
       {
         token: TOKEN,
@@ -2536,45 +1938,20 @@ async function blockAlumni(
       }
     );
 
-
-    showToast(
-      'Alumni berhasil diblokir.',
-      'success'
-    );
-
-
-    loadAdminAlumni();
-
+    await loadAdminAlumni();
+    showToast(result.message, 'success');
 
   } catch (error) {
-
-    handleError(
-      error
-    );
-
+    handleError(error);
   }
 
 }
 
 
-async function unblockAlumni(
-  id
-) {
-
-  if (
-    !confirm(
-      'Aktifkan kembali alumni ini?'
-    )
-  ) {
-
-    return;
-
-  }
-
+async function unblockAlumni(id) {
 
   try {
-
-    await server(
+    const result = await server(
       'adminUnblockAlumni',
       {
         token: TOKEN,
@@ -2582,45 +1959,24 @@ async function unblockAlumni(
       }
     );
 
-
-    showToast(
-      'Alumni berhasil diaktifkan.',
-      'success'
-    );
-
-
-    loadAdminAlumni();
-
+    await loadAdminAlumni();
+    showToast(result.message, 'success');
 
   } catch (error) {
-
-    handleError(
-      error
-    );
-
+    handleError(error);
   }
 
 }
 
 
-async function deleteAlumni(
-  id
-) {
+async function deleteAlumni(id) {
 
-  if (
-    !confirm(
-      'PERINGATAN: Data alumni akan dihapus permanen. Lanjutkan?'
-    )
-  ) {
-
+  if (!confirm('Hapus data alumni ini secara permanen?')) {
     return;
-
   }
 
-
   try {
-
-    await server(
+    const result = await server(
       'adminDeleteAlumni',
       {
         token: TOKEN,
@@ -2628,26 +1984,14 @@ async function deleteAlumni(
       }
     );
 
-
-    showToast(
-      'Data alumni berhasil dihapus.',
-      'success'
-    );
-
-
-    loadAdminAlumni();
-
+    await loadAdminAlumni();
+    showToast(result.message, 'success');
 
   } catch (error) {
-
-    handleError(
-      error
-    );
-
+    handleError(error);
   }
 
 }
-
 
 
 /* =====================================================
@@ -2658,60 +2002,37 @@ async function loadAdminCash() {
 
   try {
 
-    const [
-      summary,
-      transactions
-    ] =
-      await Promise.all([
-
-        server(
-          'getCashSummary',
-          TOKEN
-        ),
-
-        server(
-          'getCashTransactions',
-          TOKEN
-        )
-
-      ]);
+    const summary =
+      await server(
+        'getCashSummary',
+        TOKEN
+      );
 
 
     document
       .getElementById(
-        'adminIncome'
+        'adminCashSaldo'
       )
       .textContent =
         formatRupiah(
-          summary.summary.pemasukan
+          summary.saldo
         );
 
 
-    document
-      .getElementById(
-        'adminExpense'
-      )
-      .textContent =
-        formatRupiah(
-          summary.summary.pengeluaran
-        );
-
-
-    document
-      .getElementById(
-        'adminBalance'
-      )
-      .textContent =
-        formatRupiah(
-          summary.summary.saldo
-        );
+    const result =
+      await server(
+        'getCashTransactions',
+        TOKEN
+      );
 
 
     CASH_DATA =
-      transactions.data;
+      result.data || [];
 
 
-    renderAdminCash();
+    renderAdminCash(
+      CASH_DATA
+    );
 
 
   } catch (error) {
@@ -2725,260 +2046,109 @@ async function loadAdminCash() {
 }
 
 
-function renderAdminCash() {
+function renderAdminCash(
+  data
+) {
 
   const tbody =
     document
       .getElementById(
-        'adminCashTable'
+        'adminCashTableBody'
       );
 
 
-  if (!CASH_DATA.length) {
-
-    tbody.innerHTML = `
-
-      <tr>
-
-        <td colspan="5"
-            class="
-              p-10
-              text-center
-              text-slate-500">
-
-          Belum ada transaksi.
-
-        </td>
-
-      </tr>
-
-    `;
-
-    return;
-
-  }
+  tbody.innerHTML = '';
 
 
-  tbody.innerHTML =
-    CASH_DATA
-      .map(
-        tx => `
+  data.forEach(
+    tx => {
 
-          <tr class="
-            border-t
-            hover:bg-slate-50">
+      tbody.innerHTML += `
 
+        <tr class="border-b">
 
-            <td class="p-4">
+          <td class="py-3">
+            ${escapeHtml(tx.tanggal)}
+          </td>
 
-              ${escapeHtml(
-                tx.tanggal
-              )}
+          <td class="py-3">
+            ${escapeHtml(tx.tipe)}
+          </td>
 
-            </td>
+          <td class="py-3 font-semibold">
+            ${formatRupiah(tx.nominal)}
+          </td>
 
+          <td class="py-3">
+            ${escapeHtml(tx.keterangan)}
+          </td>
 
-            <td class="p-4">
-
-              <span class="
-                inline-block
-                rounded-full
-                px-2 py-1
-                text-xs
-                font-bold
-                ${
-                  tx.tipe ===
-                  'Pemasukan'
-
-                  ? 'bg-emerald-100 text-emerald-700'
-
-                  : 'bg-red-100 text-red-700'
-                }">
-
-                ${escapeHtml(
-                  tx.tipe
-                )}
-
-              </span>
-
-            </td>
-
-
-            <td class="
-              p-4
-              font-bold">
-
-              ${formatRupiah(
-                tx.nominal
-              )}
-
-            </td>
-
-
-            <td class="p-4">
-
-              ${escapeHtml(
-                tx.keterangan
-              )}
-
-            </td>
-
-
-            <td class="p-4">
+          <td class="py-3">
+            <div class="flex flex-wrap gap-2">
 
               <button
                 onclick="editCash('${escapeJs(tx.id)}')"
-                class="
-                  text-sea
-                  font-bold
-                  mr-3">
-
+                class="text-xs px-3 py-2 rounded-lg bg-slate-100">
                 Edit
-
               </button>
-
 
               <button
                 onclick="deleteCash('${escapeJs(tx.id)}')"
-                class="
-                  text-red-600
-                  font-bold">
-
+                class="text-xs px-3 py-2 rounded-lg bg-red-100 text-red-700">
                 Hapus
-
               </button>
 
-            </td>
+            </div>
+          </td>
 
+        </tr>
 
-          </tr>
+      `;
 
-        `
-      )
-      .join('');
+    }
+  );
 
 }
 
 
-
-/* =====================================================
-   CASH MODAL
-===================================================== */
-
-function openCashModal(
-  transaction = null
-) {
+function openCashModal(id = '') {
 
   const modal =
-    document
-      .getElementById(
-        'cashModal'
-      );
+    document.getElementById('cashModal');
 
+  document.getElementById('cashId').value = id;
+  document.getElementById('cashForm').reset();
+  document.getElementById('cashTanggal').value = todayLocal();
 
-  modal.classList.remove(
-    'hidden'
-  );
-
-  modal.classList.add(
-    'flex'
-  );
-
-
-  document
-    .getElementById(
-      'cashForm'
-    )
-    .reset();
-
-
-  document
-    .getElementById(
-      'cashId'
-    )
-    .value =
-      transaction
-        ? transaction.id
-        : '';
-
-
-  document
-    .getElementById(
-      'cashModalTitle'
-    )
-    .textContent =
-      transaction
-        ? 'Edit Transaksi'
-        : 'Tambah Transaksi';
-
-
-  if (!transaction) {
-
-    document
-      .getElementById(
-        'cashTanggal'
-      )
-      .value =
-        todayLocal();
-
-    return;
-
+  if (id) {
+    const item = CASH_DATA.find(x => x.id === id);
+    if (item) {
+      document.getElementById('cashTanggal').value = convertDateToInput(item.tanggal);
+      document.getElementById('cashTipe').value = item.tipe || 'Pemasukan';
+      document.getElementById('cashNominal').value = item.nominal || '';
+      document.getElementById('cashKeterangan').value = item.keterangan || '';
+    }
   }
 
+  document.getElementById('cashModalTitle').textContent = id
+    ? 'Edit Transaksi'
+    : 'Tambah Transaksi';
 
-  document
-    .getElementById(
-      'cashTanggal'
-    )
-    .value =
-      convertDateToInput(
-        transaction.tanggal
-      );
-
-
-  document
-    .getElementById(
-      'cashTipe'
-    )
-    .value =
-      transaction.tipe;
-
-
-  document
-    .getElementById(
-      'cashNominal'
-    )
-    .value =
-      transaction.nominal;
-
-
-  document
-    .getElementById(
-      'cashKeterangan'
-    )
-    .value =
-      transaction.keterangan;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
 
 }
 
 
 function closeCashModal() {
-
-  const modal =
-    document
-      .getElementById(
-        'cashModal'
-      );
+  const modal = document.getElementById('cashModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
 
 
-  modal.classList.add(
-    'hidden'
-  );
-
-  modal.classList.remove(
-    'flex'
-  );
-
+function editCash(id) {
+  openCashModal(id);
 }
 
 
@@ -2992,140 +2162,45 @@ document
 
       event.preventDefault();
 
-
-      const id =
-        document
-          .getElementById(
-            'cashId'
-          )
-          .value;
-
-
-      const data = {
-
-        token:
-          TOKEN,
-
-        tanggal:
-          document
-            .getElementById(
-              'cashTanggal'
-            )
-            .value,
-
-        tipe:
-          document
-            .getElementById(
-              'cashTipe'
-            )
-            .value,
-
-        nominal:
-          document
-            .getElementById(
-              'cashNominal'
-            )
-            .value,
-
-        keterangan:
-          document
-            .getElementById(
-              'cashKeterangan'
-            )
-            .value
-
+      const id = document.getElementById('cashId').value;
+      const payload = {
+        token: TOKEN,
+        tanggal: document.getElementById('cashTanggal').value,
+        tipe: document.getElementById('cashTipe').value,
+        nominal: document.getElementById('cashNominal').value,
+        keterangan: document.getElementById('cashKeterangan').value
       };
 
+      if (id) {
+        payload.id = id;
+      }
 
       try {
-
-        if (id) {
-
-          data.id =
-            id;
-
-
-          await server(
-            'adminUpdateCash',
-            data
-          );
-
-
-        } else {
-
-          await server(
-            'adminCreateCash',
-            data
-          );
-
-        }
-
+        const result = await server(
+          id ? 'adminUpdateCash' : 'adminCreateCash',
+          payload
+        );
 
         closeCashModal();
-
-
-        showToast(
-          'Transaksi berhasil disimpan.',
-          'success'
-        );
-
-
-        loadAdminCash();
-
+        await loadAdminCash();
+        showToast(result.message, 'success');
 
       } catch (error) {
-
-        handleError(
-          error
-        );
-
+        handleError(error);
       }
 
     }
   );
 
 
+async function deleteCash(id) {
 
-function editCash(
-  id
-) {
-
-  const tx =
-    CASH_DATA.find(
-      item =>
-        item.id === id
-    );
-
-
-  if (tx) {
-
-    openCashModal(
-      tx
-    );
-
-  }
-
-}
-
-
-async function deleteCash(
-  id
-) {
-
-  if (
-    !confirm(
-      'Hapus transaksi ini secara permanen?'
-    )
-  ) {
-
+  if (!confirm('Hapus transaksi ini?')) {
     return;
-
   }
-
 
   try {
-
-    await server(
+    const result = await server(
       'adminDeleteCash',
       {
         token: TOKEN,
@@ -3133,75 +2208,50 @@ async function deleteCash(
       }
     );
 
-
-    showToast(
-      'Transaksi berhasil dihapus.',
-      'success'
-    );
-
-
-    loadAdminCash();
-
+    await loadAdminCash();
+    showToast(result.message, 'success');
 
   } catch (error) {
-
-    handleError(
-      error
-    );
-
+    handleError(error);
   }
 
 }
 
 
-
 /* =====================================================
    EXPORT CSV
 ===================================================== */
-
 function exportCashCSV() {
-
-  if (!CASH_DATA.length) {
-
-    showToast(
-      'Tidak ada data kas untuk diekspor.',
-      'error'
-    );
-
-    return;
-
-  }
-
 
   let csv =
     'Tanggal,Tipe,Nominal,Keterangan,CreatedBy\n';
 
-
   CASH_DATA.forEach(
     tx => {
 
-      csv += [
+      csv +=
+        [
 
-        csvEscape(
-          tx.tanggal
-        ),
+          csvEscape(
+            tx.tanggal
+          ),
 
-        csvEscape(
-          tx.tipe
-        ),
+          csvEscape(
+            tx.tipe
+          ),
 
-        tx.nominal,
+          tx.nominal,
 
-        csvEscape(
-          tx.keterangan
-        ),
+          csvEscape(
+            tx.keterangan
+          ),
 
-        csvEscape(
-          tx.createdBy
-        )
+          csvEscape(
+            tx.createdBy
+          )
 
-      ].join(',') +
-      '\n';
+        ].join(',') +
+        '\n';
 
     }
   );
@@ -3228,10 +2278,8 @@ function exportCashCSV() {
       'a'
     );
 
-
   link.href =
     url;
-
 
   link.download =
     'laporan-kas-alumni.csv';
@@ -3244,9 +2292,7 @@ function exportCashCSV() {
 
   link.click();
 
-
   link.remove();
-
 
   URL.revokeObjectURL(
     url
@@ -3278,28 +2324,22 @@ async function logout() {
     );
 
   } catch (error) {
-
     console.warn(
       error
     );
-
   }
 
 
   TOKEN = null;
-
   CURRENT_USER = null;
-
 
   localStorage.removeItem(
     'alumni_token'
   );
 
-
   localStorage.removeItem(
     'alumni_user'
   );
-
 
   location.reload();
 
@@ -3324,7 +2364,6 @@ function handleError(
     error.message ||
     'Terjadi kesalahan.';
 
-
   if (
     message
       .toLowerCase()
@@ -3334,31 +2373,25 @@ function handleError(
   ) {
 
     TOKEN = null;
-
     CURRENT_USER = null;
-
 
     localStorage.removeItem(
       'alumni_token'
     );
 
-
     localStorage.removeItem(
       'alumni_user'
     );
-
 
     showToast(
       'Session berakhir. Silakan login kembali.',
       'error'
     );
 
-
     setTimeout(
       () => location.reload(),
       1200
     );
-
 
     return;
 
@@ -3371,9 +2404,6 @@ function handleError(
   );
 
 }
-
-
-
 /* =====================================================
    TOAST
 ===================================================== */
@@ -3389,10 +2419,8 @@ function showToast(
         'toast'
       );
 
-
   toast.textContent =
     message;
-
 
   toast.className = `
 
@@ -3406,7 +2434,6 @@ function showToast(
     py-4
     text-white
     shadow-2xl
-
     ${
       type === 'success'
       ? 'bg-emerald-600'
@@ -3415,14 +2442,11 @@ function showToast(
 
   `;
 
-
   setTimeout(
     () => {
-
       toast.classList.add(
         'hidden'
       );
-
     },
     3500
   );
@@ -3448,7 +2472,6 @@ function formatRupiah(
 
       currency:
         'IDR',
-
       maximumFractionDigits:
         0
 
@@ -3479,7 +2502,6 @@ function todayLocal() {
       '0'
     );
 
-
   const day =
     String(
       date.getDate()
@@ -3488,7 +2510,6 @@ function todayLocal() {
       2,
       '0'
     );
-
 
   return (
     year +
@@ -3504,17 +2525,14 @@ function todayLocal() {
 function convertDateToInput(
   value
 ) {
-
   if (!value) {
     return todayLocal();
   }
-
 
   const parts =
     String(
       value
     ).split('/');
-
 
   if (
     parts.length === 3
@@ -3532,7 +2550,6 @@ function convertDateToInput(
 
   }
 
-
   return String(
     value
   ).substring(
@@ -3547,7 +2564,6 @@ function convertDateToInput(
 /* =====================================================
    SECURITY / ESCAPE
 ===================================================== */
-
 function escapeHtml(
   value
 ) {
@@ -3604,7 +2620,6 @@ function escapeJs(
 
 }
 
-
 function csvEscape(
   value
 ) {
@@ -3641,6 +2656,5 @@ document.addEventListener(
       showApp();
 
     }
-
   }
 );
