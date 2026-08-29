@@ -496,12 +496,10 @@ function openAlumniModal(id = '') {
       document.getElementById('alumniStatusLayar').value = item.status_layar || 'On Land';
       document.getElementById('alumniKapal').value = item.nama_kapal || '';
       document.getElementById('alumniSertifikat').value = item.sertifikat || '';
-      document.getElementById('alumniRole').value = item.role || 'Alumni';
       document.getElementById('alumniStatus').value = item.status || 'Aktif';
     }
   } else {
-    document.getElementById('alumniRole').value = 'Alumni';
-    document.getElementById('alumniStatus').value = 'Aktif';
+       document.getElementById('alumniStatus').value = 'Aktif';
   }
   document.getElementById('alumniModalTitle').textContent = id ? 'Edit Alumni' : 'Tambah Alumni';
   document.getElementById('passwordHelp').textContent = id ? '(isi hanya jika ingin mengganti password)' : '(wajib untuk alumni baru)';
@@ -532,7 +530,6 @@ document.getElementById('alumniForm').addEventListener('submit', async event => 
     status_layar: document.getElementById('alumniStatusLayar').value,
     nama_kapal: document.getElementById('alumniKapal').value,
     sertifikat: document.getElementById('alumniSertifikat').value,
-    role: document.getElementById('alumniRole').value,
     status: document.getElementById('alumniStatus').value
   };
   if (password) payload.password = password;
