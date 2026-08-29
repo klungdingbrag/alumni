@@ -376,7 +376,6 @@ function filterDirectory() {
   const jurusan = document.getElementById('directoryJurusan').value;
   const angkatan = document.getElementById('directoryAngkatan').value.toLowerCase().trim();
   const status = document.getElementById('directoryStatus').value;
-
   const filtered = DIRECTORY_DATA.filter(item => {
     const matchesSearch = !search || String(item.nama || '').toLowerCase().includes(search);
     const matchesJurusan = !jurusan || item.jurusan === jurusan;
@@ -473,66 +472,110 @@ function renderAdminAlumni(data) {
       <td class="p-4">${escapeHtml(item.angkatan || '-')}</td>
       <td class="p-4"><span class="px-2 py-1 rounded-full text-xs font-bold ${item.status === 'Blocked' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${escapeHtml(item.status || '-')}</span></td>
       <td class="p-4"><div class="flex flex-wrap gap-2">
-        <button onclick="editAlumni('${escapeJs(item.id)}')" class="text-xs px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200">Edit</button>
-        ${item.status === 'Blocked' ? `<button onclick="unblockAlumni('${escapeJs(item.id)}')" class="text-xs px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700">Aktifkan</button>` : `<button onclick="blockAlumni('${escapeJs(item.id)}')" class="text-xs px-3 py-2 rounded-lg bg-amber-100 text-amber-700">Blokir</button>`}
-        ${item.role !== 'Admin' ? `<button onclick="deleteAlumni('${escapeJs(item.id)}')" class="text-xs px-3 py-2 rounded-lg bg-red-100 text-red-700">Hapus</button>` : ''}
+        <button type="button" data-action="edit-alumni" data-id="${encodeURIComponent(item.id || '')}" class="text-xs px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200">Edit</button>
+        ${item.status === 'Blocked' ? `<button type="button" data-action="unblock-alumni" data-id="${encodeURIComponent(item.id || '')}" class="text-xs px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700">Aktifkan</button>` : `<button type="button" data-action="block-alumni" data-id="${encodeURIComponent(item.id || '')}" class="text-xs px-3 py-2 rounded-lg bg-amber-100 text-amber-700">Blokir</button>`}
+        ${item.role !== 'Admin' ? `<button type="button" data-action="delete-alumni" data-id="${encodeURIComponent(item.id || '')}" class="text-xs px-3 py-2 rounded-lg bg-red-100 text-red-700">Hapus</button>` : ''}
       </div></td>
     </tr>`).join('');
 }
 
+// Event delegation prevents inline-handler parsing errors and keeps the buttons working after table re-render.
+document.getElementById('adminAlumniTable').addEventListener('click', event => {
+  const button = event.target.closest('button[data-action]');
+  if (!button) return;
+  const rawId = button.dataset.id || '';
+  const id = decodeURIComponent(rawId);
+  const action = button.dataset.action;
+  if (!id) return;
+
+  if (action === 'edit-alumni') editAlumni(id);
+  else if (action === 'block-alumni') blockAlumni(id);
+  else if (action === 'unblock-alumni') unblockAlumni(id);
+  else if (action === 'delete-alumni') deleteAlumni(id);
+});
+
 function openAlumniModal(id = '') {
   const modal = document.getElementById('alumniModal');
-  document.getElementById('alumniId').value = id;
-  document.getElementById('alumniForm').reset();
-  if (id) {
-    const item = ADMIN_ALUMNI_DATA.find(x => x.id === id);
-    if (item) {
-      document.getElementById('alumniNama').value = item.nama || '';
-      document.getElementById('alumniEmail').value = item.email || '';
-      document.getElementById('alumniWA').value = item.wa || '';
-      document.getElementById('alumniJurusan').value = item.jurusan || 'Nautika';
-      document.getElementById('alumniAngkatan').value = item.angkatan || '';
-      document.getElementById('alumniIjazah').value = item.tingkat_ijazah || '';
-      document.getElementById('alumniStatusLayar').value = item.status_layar || 'On Land';
-      document.getElementById('alumniKapal').value = item.nama_kapal || '';
-      document.getElementById('alumniSertifikat').value = item.sertifikat || '';
-      document.getElementById('alumniStatus').value = item.status || 'Aktif';
-    }
-  } else {
-       document.getElementById('alumniStatus').value = 'Aktif';
+  const form = document.getElementById('alumniForm');
+  if (!modal || !form) {
+    showToast('Form edit alumni tidak tersedia di halaman.', 'error');
+    return;
   }
-  document.getElementById('alumniModalTitle').textContent = id ? 'Edit Alumni' : 'Tambah Alumni';
-  document.getElementById('passwordHelp').textContent = id ? '(isi hanya jika ingin mengganti password)' : '(wajib untuk alumni baru)';
+
+  form.reset();
+  const idString = String(id || '').trim();
+  document.getElementById('alumniId').value = idString;
+
+  const item = idString
+    ? ADMIN_ALUMNI_DATA.find(x => String(x.id || '').trim() === idString)
+    : null;
+
+  if (idString && !item) {
+    showToast('Data alumni tidak ditemukan. Silakan muat ulang menu Kelola Alumni.', 'error');
+    return;
+  }
+
+  if (item) {
+    document.getElementById('alumniNama').value = item.nama || '';
+    document.getElementById('alumniEmail').value = item.email || '';
+    document.getElementById('alumniWA').value = item.wa || '';
+    document.getElementById('alumniJurusan').value = item.jurusan || 'Nautika';
+    document.getElementById('alumniAngkatan').value = item.angkatan || '';
+    document.getElementById('alumniIjazah').value = item.tingkat_ijazah || '';
+    document.getElementById('alumniStatusLayar').value = item.status_layar || 'On Land';
+    document.getElementById('alumniKapal').value = item.nama_kapal || '';
+    document.getElementById('alumniSertifikat').value = item.sertifikat || '';
+    document.getElementById('alumniStatus').value = item.status || 'Aktif';
+  } else {
+    document.getElementById('alumniJurusan').value = 'Nautika';
+    document.getElementById('alumniStatusLayar').value = 'On Land';
+    document.getElementById('alumniStatus').value = 'Aktif';
+  }
+
+  document.getElementById('alumniModalTitle').textContent = idString ? 'Edit Alumni' : 'Tambah Alumni';
+  document.getElementById('passwordHelp').textContent = idString ? '(isi hanya jika ingin mengganti password)' : '(wajib untuk alumni baru)';
+  const passwordInput = document.getElementById('alumniPassword');
+  passwordInput.value = '';
+  passwordInput.required = !idString;
+
   modal.classList.remove('hidden');
   modal.classList.add('flex');
 }
 
 function closeAlumniModal() {
   const modal = document.getElementById('alumniModal');
+  if (!modal) return;
   modal.classList.add('hidden');
   modal.classList.remove('flex');
 }
-function editAlumni(id) { openAlumniModal(id); }
+
+function editAlumni(id) {
+  openAlumniModal(id);
+}
 
 document.getElementById('alumniForm').addEventListener('submit', async event => {
   event.preventDefault();
-  const id = document.getElementById('alumniId').value;
+
+  const id = document.getElementById('alumniId').value.trim();
   const password = document.getElementById('alumniPassword').value;
+
   const payload = {
     token: TOKEN,
-    id,
-    nama: document.getElementById('alumniNama').value,
-    email: document.getElementById('alumniEmail').value,
-    wa: document.getElementById('alumniWA').value,
+    nama: document.getElementById('alumniNama').value.trim(),
+    email: document.getElementById('alumniEmail').value.trim(),
+    wa: document.getElementById('alumniWA').value.trim(),
     jurusan: document.getElementById('alumniJurusan').value,
-    angkatan: document.getElementById('alumniAngkatan').value,
-    tingkat_ijazah: document.getElementById('alumniIjazah').value,
+    angkatan: document.getElementById('alumniAngkatan').value.trim(),
+    tingkat_ijazah: document.getElementById('alumniIjazah').value.trim(),
     status_layar: document.getElementById('alumniStatusLayar').value,
-    nama_kapal: document.getElementById('alumniKapal').value,
-    sertifikat: document.getElementById('alumniSertifikat').value,
+    nama_kapal: document.getElementById('alumniKapal').value.trim(),
+    sertifikat: document.getElementById('alumniSertifikat').value.trim(),
     status: document.getElementById('alumniStatus').value
   };
+
+  if (id) payload.id = id;
   if (password) payload.password = password;
+
   try {
     const result = await server(id ? 'adminUpdateAlumni' : 'adminCreateAlumni', payload);
     closeAlumniModal();
@@ -551,6 +594,7 @@ async function blockAlumni(id) {
 }
 
 async function unblockAlumni(id) {
+  if (!confirm('Aktifkan kembali alumni ini?')) return;
   try {
     const result = await server('adminUnblockAlumni', { token: TOKEN, id });
     await loadAdminAlumni();
@@ -598,8 +642,8 @@ function renderAdminCash() {
       <td class="p-4 font-bold">${formatRupiah(tx.nominal)}</td>
       <td class="p-4">${escapeHtml(tx.keterangan)}</td>
       <td class="p-4"><div class="flex flex-wrap gap-2">
-        <button onclick="editCash('${escapeJs(tx.id)}')" class="text-xs px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200">Edit</button>
-        <button onclick="deleteCash('${escapeJs(tx.id)}')" class="text-xs px-3 py-2 rounded-lg bg-red-100 text-red-700">Hapus</button>
+        <button type="button" onclick="editCash('${escapeJs(tx.id)}')" class="text-xs px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200">Edit</button>
+        <button type="button" onclick="deleteCash('${escapeJs(tx.id)}')" class="text-xs px-3 py-2 rounded-lg bg-red-100 text-red-700">Hapus</button>
       </div></td>
     </tr>`).join('');
 }
@@ -622,11 +666,13 @@ function openCashModal(id = '') {
   modal.classList.remove('hidden');
   modal.classList.add('flex');
 }
+
 function closeCashModal() {
   const modal = document.getElementById('cashModal');
   modal.classList.add('hidden');
   modal.classList.remove('flex');
 }
+
 function editCash(id) { openCashModal(id); }
 
 document.getElementById('cashForm').addEventListener('submit', async event => {
@@ -658,6 +704,10 @@ async function deleteCash(id) {
 }
 
 function exportCashCSV() {
+  if (!CASH_DATA.length) {
+    showToast('Tidak ada transaksi untuk diekspor.', 'error');
+    return;
+  }
   let csv = 'Tanggal,Tipe,Nominal,Keterangan,CreatedBy\n';
   CASH_DATA.forEach(tx => {
     csv += [csvEscape(tx.tanggal), csvEscape(tx.tipe), tx.nominal, csvEscape(tx.keterangan), csvEscape(tx.createdBy)].join(',') + '\n';
